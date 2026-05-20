@@ -207,8 +207,6 @@ Claude Code's `Read` tool has a **~100MB file size limit**. For larger PDFs:
 
 **Support files** in this skill:
 - `scripts/pdf_to_pngs.py` — CLI tool for PDF→PNG conversion (supports `--sheets` contact-sheet mode)
-- `templates/brooks-pa-monitor.pine` — TradingView Pine Script for Al Brooks price action monitoring
-- `references/al-brooks-price-action-rules.md` — Quantified Al Brooks strategy rules from HTT PA course
 
 ### PTY mode vs background mode for long-running Claude
 
