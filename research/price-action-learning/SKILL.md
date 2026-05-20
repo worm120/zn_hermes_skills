@@ -118,19 +118,23 @@ claude --dangerously-skip-permissions \
 
 ---
 
-## PDF 文件
+## PDF 文件（GitHub 仓库内）
 
-> ⚠️ PDF 文件体积较大（130-370MB），不推荐放在 git 仓库中。
+由于 GitHub 限制单文件最大 100MB，原始 PDF (130MB) 已拆分为两部分存放在仓库中：
 
-**获取方式：**
-1. **scp 拷贝到公司机器：**
-   ```bash
-   scp /home/zn/Downloads/HTT\ PA\(带书签\).pdf user@公司机器:~/pa/
-   scp /home/zn/Downloads/1_阿布PA基础1-36.pdf user@公司机器:~/pa/
-   scp /home/zn/Downloads/2_阿布PA进阶37-52.pdf user@公司机器:~/pa/
-   ```
-2. **使用网盘链接**（如百度云/阿里云）
-3. **在目标机器上重新渲染 PNG：**
-   ```bash
-   python3 ~/.hermes/skills/autonomous-ai-agents/claude-code/scripts/pdf_to_pngs.py ~/pa/HTT\ PA\(带书签\).pdf --output /tmp/htt_pages
-   ```
+```
+pdf/htt-pa/
+├── HTT_PA_part1_Ch1-36.pdf    ← 66MB (page 1-700)
+└── HTT_PA_part2_Ch37-52.pdf   ← 64MB (page 701-1375)
+```
+
+这些文件在 `git clone` 时会自动下载，公司机器无需额外操作。
+
+**重新渲染 PNG：**
+```bash
+python3 ~/.hermes/skills/research/price-action-learning/scripts/pdf_to_pngs.py \
+  ~/.hermes/skills/pdf/htt-pa/HTT_PA_part2_Ch37-52.pdf \
+  --pages 0-900 \
+  --dpi 150 \
+  --output /tmp/htt_pages_44_52
+```
