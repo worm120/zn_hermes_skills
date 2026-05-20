@@ -54,6 +54,45 @@ Exec=env GTK_IM_MODULE=fcitx QT_IM_MODULE=fcitx XMODIFIERS=@im=fcitx SDL_IM_MODU
 
 **Key insight**: `waylandFrontend = true` means `GTK_IM_MODULE` and `QT_IM_MODULE` are NOT set globally. XWayland apps need these explicitly.
 
+## SSH Behind HTTP Proxy (GitHub Push)
+
+**Problem**: SSH to GitHub (port 22) times out even though HTTP/HTTPS traffic works through the proxy. This happens because SSH does not use `HTTP_PROXY` / `HTTPS_PROXY` environment variables.
+
+**Symptom**:
+```bash
+$ ssh -T git@github.com
+# hangs forever or times out
+```
+
+**Diagnosis**:
+- `curl -x http://127.0.0.1:7890 -s https://github.com` works → HTTP proxy is fine
+- `ssh -T git@github.com` hangs → SSH bypasses the proxy
+- Solution: use `nc` as an SSH ProxyCommand to tunnel through the HTTP CONNECT method
+
+**Fix**: Add this to `~/.ssh/config` (create the file if it doesn't exist):
+```
+Host github.com
+    ProxyCommand nc -X connect -x 127.0.0.1:7890 %h %p
+    User git
+    Hostname github.com
+    Port 22
+    IdentityFile ~/.ssh/id_ed25519
+    StrictHostKeyChecking accept-new
+```
+
+**How it works**: `nc -X connect -x proxyhost:port` tells netcat to use the HTTP CONNECT method, which establishes a raw TCP tunnel through the HTTP proxy to the target host. SSH then runs its normal protocol through that tunnel.
+
+**Pitfalls**:
+- The `nc` (netcat) variant must support `-X` (HTTP proxy mode). OpenBSD netcat and NixOS's default `nc` both support it. If `nc -X` fails, install `nmap`'s `ncat` or use `corkscrew`.
+- `StrictHostKeyChecking accept-new` auto-accepts the GitHub host key on first connection. Omit this line if you prefer manual verification.
+- If the proxy requires authentication, add `-P proxy_user` to the ProxyCommand or use netcat with proxy auth support.
+
+**Verification**:
+```bash
+ssh -T git@github.com
+# Expected: "Hi username! You've successfully authenticated..."
+```
+
 ## Common NixOS Commands
 
 | Command | Purpose |

@@ -1,0 +1,30 @@
+//@version=5
+indicator(title="Al Brooks Price Action Monitor", shorttitle="Brooks PA", overlay=true, max_bars_back=200)
+
+// ============================================================
+// Al Brooks 价格行为学监控指标
+// 基于HTT PA课程第37-52章的可编程规则
+//
+// 安装: 复制到 TradingView Pine Editor, 保存后添加到图表
+// ============================================================
+
+// --- 参数 ---
+atrLength = input.int(20, "ATR周期")
+channelLookback = input.int(20, "通道检测周期")
+signalStrength = input.int(50, "信号K线实体占比(%)", minval=30, maxval=90)
+showLabels = input.bool(true, "显示信号标签")
+showChannel = input.bool(true, "显示通道类型")
+alertEnabled = input.bool(true, "启用警报")
+
+// --- 基础计算 ---
+atrVal = ta.atr(atrLength)
+ema20 = ta.ema(close, 20)
+body = math.abs(close - open)
+bodyPct = body / (high - low) * 100
+rangeHL = high - low
+
+// 强牛/强熊K线
+isStrongBull = close > open and bodyPct >= signalStrength and close >= high - 0.2 * rangeHL
+isStrongBear = close < open and bodyPct >= signalStrength and close <= low + 0.2 * rangeHL
+
+// --- 通道类型检测 ---
